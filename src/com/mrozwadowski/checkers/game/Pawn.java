@@ -5,7 +5,7 @@ package com.mrozwadowski.checkers.game;
  *
  * Created by rozwad on 15.12.16.
  */
-class Pawn {
+public class Pawn {
     private Color color;
 
     Pawn(Color color) {
@@ -14,5 +14,9 @@ class Pawn {
 
     public Color getColor() {
         return color;
+    }
+
+    public boolean isBlack() {
+        return color == Color.BLACK;
     }
 }

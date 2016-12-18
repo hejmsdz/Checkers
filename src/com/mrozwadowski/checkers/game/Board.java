@@ -5,7 +5,7 @@ package com.mrozwadowski.checkers.game;
  *
  * Created by rozwad on 15.12.16.
  */
-class Board {
+public class Board {
     private int size;
     private Field fields[][];
 
@@ -15,7 +15,7 @@ class Board {
         initializeFields();
     }
 
-    int getSize() {
+    public int getSize() {
         return size;
     }
 
@@ -31,7 +31,7 @@ class Board {
         }
     }
 
-    private Field getFieldAt(int row, int column) {
+    public Field getFieldAt(int row, int column) {
         if (row > size || column > size) {
             throw new IllegalArgumentException("Field coordinates are out of range");
         }

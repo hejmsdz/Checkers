@@ -20,6 +20,10 @@ public class Game {
         placePawns(pawnRows);
     }
 
+    public Board getBoard() {
+        return board;
+    }
+
     /**
      * Places white and black pawns on the edges of the board.
      */

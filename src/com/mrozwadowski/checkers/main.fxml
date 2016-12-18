@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="200.0" prefWidth="200.0" stylesheets="@default.css" xmlns="http://javafx.com/javafx/8.0.112" fx:controller="com.mrozwadowski.checkers.Controller">
+    <center>
+        <Pane fx:id="boardPane" minHeight="500.0" minWidth="500.0">
+            <BorderPane.margin>
+                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+            </BorderPane.margin>
+        </Pane>
+    </center>
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <Menu mnemonicParsing="false" text="Game">
+                <MenuItem mnemonicParsing="false" text="Pause"/>
+                <MenuItem mnemonicParsing="false" onAction="#newGame" text="New game..."/>
+                <MenuItem mnemonicParsing="false" text="Close"/>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Theme">
+                <MenuItem mnemonicParsing="false" text="Style 1"/>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+                <MenuItem mnemonicParsing="false" text="About"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <right>
+        <AnchorPane>
+            <ListView prefHeight="524.0" prefWidth="248.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <BorderPane.margin>
+                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+            </BorderPane.margin>
+        </AnchorPane>
+    </right>
+    <bottom>
+        <HBox fx:id="statusBar">
+            <padding>
+                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+            </padding>
+            <Label fx:id="fieldName"/>
+        </HBox>
+    </bottom>
+</BorderPane>

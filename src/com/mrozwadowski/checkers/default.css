@@ -1,0 +1,34 @@
+
+#boardPane {
+    -fx-background-color: #363732;
+}
+
+.pawn {
+    -fx-fill: -fx-base;
+    -fx-stroke-width: 5px;
+    -fx-stroke: derive(-fx-fill, -15%);
+}
+
+.field {
+    -fx-fill: -fx-base;
+}
+
+.black.field {
+    -fx-base: #363732;
+}
+
+.white.field {
+    -fx-base: #D4E4BC;
+}
+
+.black.pawn {
+    -fx-base: #F55D3E;
+}
+
+.white.pawn {
+    -fx-base: #76BED0;
+}
+
+#statusBar {
+    -fx-background-color: #ddd;
+}

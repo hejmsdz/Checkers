@@ -5,7 +5,7 @@ package com.mrozwadowski.checkers.game;
  *
  * Created by rozwad on 15.12.16.
  */
-class Field {
+public class Field {
     private int row, column;
     private Pawn pawn;
     private Color color;
@@ -13,7 +13,7 @@ class Field {
     Field(int row, int column) {
         this.row = row;
         this.column = column;
-        this.color = (row + column) % 2 == 1 ? Color.BLACK : Color.WHITE;
+        this.color = (row + column) % 2 == 0 ? Color.BLACK : Color.WHITE;
         this.pawn = null;
     }
 
@@ -36,6 +36,15 @@ class Field {
     public Color getColor() {
         return color;
     }
+
+    public boolean hasPawn() {
+        return pawn != null;
+    }
+
+    public boolean isBlack() {
+        return color == Color.BLACK;
+    }
+
 
     public String userFriendlyCoordinates() {
         return "" + (char)('A' + column) + (row + 1);
