@@ -17,7 +17,7 @@ public class Controller implements Initializable {
     @FXML
     private Label fieldName;
 
-    Game game;
+    private Game game;
 
     @Override
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
@@ -25,10 +25,13 @@ public class Controller implements Initializable {
     }
 
     public void newGame(ActionEvent event) {
-        Game game = new Game(8, 3);
-
+        game = new Game(8, 3);
         BoardDrawer drawer = new BoardDrawer(game.getBoard(), boardPane, fieldName);
+        game.setListener(drawer);
+
         drawer.draw();
+
+        game.move(2, 0, 3, 1);
     }
 
 }

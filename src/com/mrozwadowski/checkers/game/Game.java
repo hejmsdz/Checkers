@@ -1,5 +1,7 @@
 package com.mrozwadowski.checkers.game;
 
+import com.mrozwadowski.checkers.events.GameEventListener;
+
 /**
  * Represents a game in progress and its state.
  *
@@ -7,6 +9,7 @@ package com.mrozwadowski.checkers.game;
  */
 public class Game {
     private Board board;
+    private GameEventListener listener;
 
     public Game(int boardSize, int pawnRows) {
         if (boardSize < 5) {
@@ -24,6 +27,15 @@ public class Game {
         return board;
     }
 
+    public GameEventListener getListener() {
+        return listener;
+    }
+
+    public void setListener(GameEventListener listener) {
+        this.listener = listener;
+    }
+
+
     /**
      * Places white and black pawns on the edges of the board.
      */
@@ -39,5 +51,18 @@ public class Game {
                 board.placePawn(i, j, new Pawn(Color.BLACK));
             }
         }
+    }
+
+    public void move(int i0, int j0, int i, int j) {
+        Field source = board.getFieldAt(i0, j0);
+        Field target = board.getFieldAt(i, j);
+
+        Pawn pawn = source.getPawn();
+        source.setPawn(target.getPawn());
+        target.setPawn(pawn);
+
+        int di = i - i0;
+        int dj = j - j0;
+        listener.pawnMoved(pawn, source, target);
     }
 }
