@@ -11,9 +11,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="200.0" prefWidth="200.0" stylesheets="@default.css" xmlns="http://javafx.com/javafx/8.0.112" fx:controller="com.mrozwadowski.checkers.Controller">
+<BorderPane prefHeight="200.0" prefWidth="200.0" stylesheets="@default.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mrozwadowski.checkers.Controller">
     <center>
-        <Pane fx:id="boardPane" minHeight="500.0" minWidth="500.0">
+        <Pane fx:id="boardPane" minHeight="500.0" minWidth="500.0" styleClass="theme1">
             <BorderPane.margin>
                 <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
             </BorderPane.margin>
@@ -22,21 +22,23 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu mnemonicParsing="false" text="Game">
-                <MenuItem mnemonicParsing="false" text="Pause"/>
-                <MenuItem mnemonicParsing="false" onAction="#newGame" text="New game..."/>
-                <MenuItem mnemonicParsing="false" text="Close"/>
+                <MenuItem mnemonicParsing="false" text="Pause" />
+                <MenuItem mnemonicParsing="false" onAction="#newGame" text="New game..." />
+                <MenuItem mnemonicParsing="false" text="Close" />
             </Menu>
             <Menu mnemonicParsing="false" text="Theme">
-                <MenuItem mnemonicParsing="false" text="Style 1"/>
+                <MenuItem mnemonicParsing="false" onAction="#setTheme1" text="Style 1" />
+                <MenuItem mnemonicParsing="false" onAction="#setTheme2" text="Style 2" />
+                <MenuItem mnemonicParsing="false" onAction="#setTheme3" text="Style 3" />
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
-                <MenuItem mnemonicParsing="false" text="About"/>
+                <MenuItem mnemonicParsing="false" text="About" />
             </Menu>
         </MenuBar>
     </top>
     <right>
         <AnchorPane>
-            <ListView prefHeight="524.0" prefWidth="248.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <ListView fx:id="gameLog" prefHeight="524.0" prefWidth="248.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             <BorderPane.margin>
                 <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
             </BorderPane.margin>
@@ -45,9 +47,9 @@
     <bottom>
         <HBox fx:id="statusBar">
             <padding>
-                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0"/>
+                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
             </padding>
-            <Label fx:id="fieldName"/>
+            <Label fx:id="fieldName" />
         </HBox>
     </bottom>
 </BorderPane>

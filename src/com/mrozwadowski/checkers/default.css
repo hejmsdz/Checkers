@@ -1,5 +1,11 @@
+#gameLog .error{
+    -fx-text-fill: #F55D3E;
+    -fx-font-weight: bold;
+}
 
-#boardPane {
+
+/* theme 1 */
+#boardPane.theme1 {
     -fx-background-color: #363732;
 }
 
@@ -9,24 +15,74 @@
     -fx-stroke: derive(-fx-fill, -15%);
 }
 
-.field {
+.theme1 .field {
     -fx-fill: -fx-base;
 }
 
-.black.field {
+.theme1 .black.field {
     -fx-base: #363732;
 }
 
-.white.field {
+.theme1 .white.field {
     -fx-base: #D4E4BC;
 }
 
-.black.pawn {
+.theme1 .black.pawn {
     -fx-base: #F55D3E;
 }
 
-.white.pawn {
+.theme1 .white.pawn {
     -fx-base: #76BED0;
+}
+
+/* theme 2 */
+#boardPane.theme2 {
+    -fx-background-color: #202030;
+}
+
+.theme2 .field {
+    -fx-fill: -fx-base;
+}
+
+.theme2 .black.field {
+    -fx-base: #202030;
+}
+
+.theme2 .white.field {
+    -fx-base: #B0A990;
+}
+
+.theme2 .black.pawn {
+    -fx-base: #99C24D;
+}
+
+.theme2 .white.pawn {
+    -fx-base: #F18F01;
+}
+
+/* theme 3 */
+#boardPane.theme3 {
+    -fx-background-color: #1D1A05;
+}
+
+.theme3 .field {
+    -fx-fill: -fx-base;
+}
+
+.theme3 .black.field {
+    -fx-base: #1D1A05;
+}
+
+.theme3 .white.field {
+    -fx-base: #FFFBBD;
+}
+
+.theme3 .black.pawn {
+    -fx-base: #CA3C25;
+}
+
+.theme3 .white.pawn {
+    -fx-base: #EECF6D;
 }
 
 #statusBar {

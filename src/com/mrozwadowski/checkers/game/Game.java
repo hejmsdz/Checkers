@@ -1,6 +1,8 @@
 package com.mrozwadowski.checkers.game;
 
+import com.mrozwadowski.checkers.errors.IllegalMoveException;
 import com.mrozwadowski.checkers.events.GameEventListener;
+import com.mrozwadowski.checkers.players.Player;
 
 /**
  * Represents a game in progress and its state.
@@ -9,9 +11,11 @@ import com.mrozwadowski.checkers.events.GameEventListener;
  */
 public class Game {
     private Board board;
+    private Color turn;
+    private Player blackPlayer, whitePlayer;
     private GameEventListener listener;
 
-    public Game(int boardSize, int pawnRows) {
+    public Game(int boardSize, int pawnRows, Player blackPlayer, Player whitePlayer) {
         if (boardSize < 5) {
             throw new IllegalArgumentException("Minimum board size is 5");
         }
@@ -21,6 +25,14 @@ public class Game {
 
         board = new Board(boardSize);
         placePawns(pawnRows);
+
+        this.blackPlayer = blackPlayer;
+        this.whitePlayer = whitePlayer;
+        blackPlayer.setGame(this);
+        whitePlayer.setGame(this);
+
+        turn = Color.WHITE;
+        whitePlayer.myTurn();
     }
 
     public Board getBoard() {
@@ -35,6 +47,9 @@ public class Game {
         this.listener = listener;
     }
 
+    public Player getPlayer(Color color) {
+        return color == Color.BLACK ? blackPlayer : whitePlayer;
+    }
 
     /**
      * Places white and black pawns on the edges of the board.
@@ -53,16 +68,38 @@ public class Game {
         }
     }
 
-    public void move(int i0, int j0, int i, int j) {
-        Field source = board.getFieldAt(i0, j0);
-        Field target = board.getFieldAt(i, j);
-
+    public void move(Field source, Field target) throws IllegalMoveException {
+        if (!source.hasPawn()) {
+            throw new IllegalMoveException("Source field must have a pawn on it!");
+        }
         Pawn pawn = source.getPawn();
+        if (pawn.getColor() != turn) {
+            throw new IllegalMoveException("It's not your turn!");
+        }
+        if (target.hasPawn()) {
+            throw new IllegalMoveException("Target field must be empty!");
+        }
+        int di = target.getRow() - source.getRow();
+        int dj = target.getColumn() - source.getColumn();
+        if (Math.abs(di) != Math.abs(dj)) {
+            throw new IllegalMoveException("Moves must be diagonal!");
+        }
+
         source.setPawn(target.getPawn());
         target.setPawn(pawn);
 
-        int di = i - i0;
-        int dj = j - j0;
         listener.pawnMoved(pawn, source, target);
+
+        switchTurn();
+    }
+
+    private void switchTurn() {
+        if (turn == Color.BLACK) {
+            turn = Color.WHITE;
+            whitePlayer.myTurn();
+        } else {
+            turn = Color.BLACK;
+            blackPlayer.myTurn();
+        }
     }
 }

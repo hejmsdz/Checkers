@@ -1,9 +1,12 @@
 package com.mrozwadowski.checkers;
 
+import com.mrozwadowski.checkers.errors.IllegalMoveException;
 import com.mrozwadowski.checkers.events.GameEventListener;
 import com.mrozwadowski.checkers.game.Field;
 import com.mrozwadowski.checkers.game.Game;
 import com.mrozwadowski.checkers.game.Pawn;
+import com.mrozwadowski.checkers.players.HumanPlayer;
+import com.mrozwadowski.checkers.players.Player;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -13,6 +16,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -25,6 +31,8 @@ public class Controller implements GameEventListener {
     private Pane boardPane;
     @FXML
     private Label fieldName;
+    @FXML
+    private ListView<Label> gameLog;
 
     private Game game;
 
@@ -32,16 +40,32 @@ public class Controller implements GameEventListener {
     private double boardSize;
     private double fieldSize;
 
+    private HumanPlayer moveInProgress;
+
+
     private HashMap<Pawn, Circle> pawns;
+
+    public void logMessage(String message) {
+        logMessage(message, "");
+    }
+
+    public void logMessage(String message, String cssClass) {
+        Label item = new Label(message);
+        if (!cssClass.isEmpty()) {
+            item.getStyleClass().add(cssClass);
+        }
+        gameLog.getItems().add(item);
+    }
 
     private void drawBoard() {
         boardSize = game.getBoard().getSize();
-        fieldSize = (boardPane.getMinWidth() - 2 * borderWidth) / boardSize;
+        fieldSize = (boardPane.getWidth() - 2 * borderWidth) / boardSize;
         double halfFieldSize = fieldSize/2;
         pawns = new HashMap<>();
 
         ObservableList<Node> objects = boardPane.getChildren();
         objects.clear();
+        gameLog.getItems().clear();
 
         double x;
         double y = (boardSize - 1) * fieldSize + borderWidth;
@@ -49,15 +73,28 @@ public class Controller implements GameEventListener {
         for (int i=0; i<boardSize; i++) {
             x = borderWidth;
             for (int j=0; j<boardSize; j++) {
-                Field field = game.getBoard().getFieldAt(i, j);
+                final Field field = game.getBoard().getFieldAt(i, j);
                 Rectangle square = new Rectangle(fieldSize, fieldSize);
                 square.relocate(x, y);
 
                 square.getStyleClass().addAll("field", field.isBlack() ? "black" : "white");
-                final String coords = field.userFriendlyCoordinates();
-                final int i1 = i;
-                final int j1 = j;
-                square.setOnMouseEntered(event -> fieldName.setText(coords + " ["+i1+","+j1+"]"));
+
+                square.setOnMouseClicked(event -> {
+                    if (event.getButton() == MouseButton.PRIMARY && moveInProgress != null) {
+                        moveInProgress.requestMoveEnd(field);
+                        moveInProgress = null;
+                    } else {
+                        if (field.hasPawn()) {
+                            Pawn pawn = field.getPawn();
+                            Player player = game.getPlayer(pawn.getColor());
+                            if (player.getClass() == HumanPlayer.class) {
+                                moveInProgress = (HumanPlayer)player;
+                                moveInProgress.requestMoveStart(field);
+                            }
+                        }
+                    }
+                });
+                square.setOnMouseEntered(event -> fieldName.setText(field.userFriendlyCoordinates()));
                 square.setOnMouseExited(event -> fieldName.setText(""));
                 objects.add(square);
 
@@ -88,6 +125,8 @@ public class Controller implements GameEventListener {
 
     @Override
     public void pawnMoved(Pawn pawn, Field source, Field target) {
+        logMessage(source.userFriendlyCoordinates() + " - " + target.userFriendlyCoordinates());
+
         Node node = pawns.get(pawn);
         double x = node.getLayoutX();
         double y = node.getLayoutY();
@@ -109,11 +148,24 @@ public class Controller implements GameEventListener {
     }
 
     public void newGame(ActionEvent event) {
-        game = new Game(8, 3);
+        Player p1 = new HumanPlayer("Andrzej", this);
+        Player p2 = new HumanPlayer("Bartek", this);
+
+        game = new Game(8, 2, p1, p2);
         game.setListener(this);
         drawBoard();
+    }
 
-        game.move(2, 0, 3, 1);
+    public void setTheme1(ActionEvent event) {
+        boardPane.getStyleClass().setAll("theme1");
+    }
+
+    public void setTheme2(ActionEvent event) {
+        boardPane.getStyleClass().setAll("theme2");
+    }
+
+    public void setTheme3(ActionEvent event) {
+        boardPane.getStyleClass().setAll("theme3");
     }
 
 }
