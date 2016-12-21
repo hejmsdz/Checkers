@@ -1,6 +1,7 @@
 package com.mrozwadowski.checkers.events;
 
-import com.mrozwadowski.checkers.game.Field;
+import com.mrozwadowski.checkers.game.Color;
+import com.mrozwadowski.checkers.game.MoveSequence;
 import com.mrozwadowski.checkers.game.Pawn;
 
 /**
@@ -9,7 +10,9 @@ import com.mrozwadowski.checkers.game.Pawn;
  * Created by rozwad on 18.12.16.
  */
 public interface GameEventListener {
-    void pawnMoved(Pawn pawn, Field source, Field target);
+    void pawnMoved(Pawn pawn, MoveSequence move);
 
-    void pawnCaptured(Pawn pawn);
+    void pawnCrowned(Pawn pawn);
+
+    void turnChanged(Color color);
 }

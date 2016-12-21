@@ -3,16 +3,19 @@
     -fx-font-weight: bold;
 }
 
-
-/* theme 1 */
-#boardPane.theme1 {
-    -fx-background-color: #363732;
-}
-
 .pawn {
     -fx-fill: -fx-base;
     -fx-stroke-width: 5px;
     -fx-stroke: derive(-fx-fill, -15%);
+}
+
+.pawn.crowned {
+    -fx-fill: derive(-fx-base, -20%);
+}
+
+/* theme 1 */
+.theme1 #boardPane {
+    -fx-background-color: #363732;
 }
 
 .theme1 .field {
@@ -36,7 +39,7 @@
 }
 
 /* theme 2 */
-#boardPane.theme2 {
+.theme2 #boardPane {
     -fx-background-color: #202030;
 }
 
@@ -61,7 +64,7 @@
 }
 
 /* theme 3 */
-#boardPane.theme3 {
+.theme3 #boardPane {
     -fx-background-color: #1D1A05;
 }
 
@@ -87,4 +90,9 @@
 
 #statusBar {
     -fx-background-color: #ddd;
+}
+
+#turnName {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-base;
 }

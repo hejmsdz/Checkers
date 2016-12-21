@@ -1,16 +1,17 @@
 package com.mrozwadowski.checkers;
 
 import com.mrozwadowski.checkers.errors.IllegalMoveException;
+import com.mrozwadowski.checkers.events.FieldClickHandler;
 import com.mrozwadowski.checkers.events.GameEventListener;
-import com.mrozwadowski.checkers.game.Field;
-import com.mrozwadowski.checkers.game.Game;
-import com.mrozwadowski.checkers.game.Pawn;
+import com.mrozwadowski.checkers.game.*;
+import com.mrozwadowski.checkers.players.ComputerPlayer;
 import com.mrozwadowski.checkers.players.HumanPlayer;
 import com.mrozwadowski.checkers.players.Player;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,18 +20,25 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class Controller implements GameEventListener {
+    @FXML
+    private BorderPane root;
     @FXML
     private Pane boardPane;
     @FXML
     private Label fieldName;
+    @FXML
+    private Label turnName;
     @FXML
     private ListView<Label> gameLog;
 
@@ -40,8 +48,7 @@ public class Controller implements GameEventListener {
     private double boardSize;
     private double fieldSize;
 
-    private HumanPlayer moveInProgress;
-
+    private FieldClickHandler fieldClicker;
 
     private HashMap<Pawn, Circle> pawns;
 
@@ -55,6 +62,7 @@ public class Controller implements GameEventListener {
             item.getStyleClass().add(cssClass);
         }
         gameLog.getItems().add(item);
+        gameLog.scrollTo(item);
     }
 
     private void drawBoard() {
@@ -75,26 +83,15 @@ public class Controller implements GameEventListener {
             for (int j=0; j<boardSize; j++) {
                 final Field field = game.getBoard().getFieldAt(i, j);
                 Rectangle square = new Rectangle(fieldSize, fieldSize);
+                square.setUserData(field);
                 square.relocate(x, y);
 
                 square.getStyleClass().addAll("field", field.isBlack() ? "black" : "white");
 
-                square.setOnMouseClicked(event -> {
-                    if (event.getButton() == MouseButton.PRIMARY && moveInProgress != null) {
-                        moveInProgress.requestMoveEnd(field);
-                        moveInProgress = null;
-                    } else {
-                        if (field.hasPawn()) {
-                            Pawn pawn = field.getPawn();
-                            Player player = game.getPlayer(pawn.getColor());
-                            if (player.getClass() == HumanPlayer.class) {
-                                moveInProgress = (HumanPlayer)player;
-                                moveInProgress.requestMoveStart(field);
-                            }
-                        }
-                    }
-                });
-                square.setOnMouseEntered(event -> fieldName.setText(field.userFriendlyCoordinates()));
+                if (fieldClicker != null) {
+                    square.setOnMouseClicked(fieldClicker);
+                }
+                square.setOnMouseEntered(event -> fieldName.setText(field.userFriendlyCoordinates()+" ["+field.getRow()+","+field.getColumn()+"]"+" ["+field.getPawn()+"]"));
                 square.setOnMouseExited(event -> fieldName.setText(""));
                 objects.add(square);
 
@@ -124,48 +121,113 @@ public class Controller implements GameEventListener {
     }
 
     @Override
-    public void pawnMoved(Pawn pawn, Field source, Field target) {
-        logMessage(source.userFriendlyCoordinates() + " - " + target.userFriendlyCoordinates());
+    public void pawnMoved(Pawn pawn, MoveSequence move) {
+        double animationTime = 500;
+        Field source = move.getSource();
 
         Node node = pawns.get(pawn);
         double x = node.getLayoutX();
         double y = node.getLayoutY();
 
-        int di = target.getRow() - source.getRow();
-        int dj = target.getColumn() - source.getColumn();
+        List<Pawn> captures = move.getCaptures();
+        int numCaptures = captures.size();
 
         final Timeline timeline = new Timeline();
-        final KeyValue kvX = new KeyValue(node.layoutXProperty(), x + dj*fieldSize, Interpolator.EASE_BOTH);
-        final KeyValue kvY = new KeyValue(node.layoutYProperty(), y - di*fieldSize, Interpolator.EASE_BOTH);
-        final KeyFrame kf = new KeyFrame(Duration.millis(500), kvX, kvY);
-        timeline.getKeyFrames().add(kf);
-        timeline.play();
+        int n = 0;
+        for (Field target: move.getFields()) {
+            if (n == 0) {
+                n++;
+                continue;
+            }
+
+            int di = target.getRow() - source.getRow();
+            int dj = target.getColumn() - source.getColumn();
+
+            double newX = x + dj * fieldSize;
+            double newY = y - di * fieldSize;
+
+            final KeyValue kvX = new KeyValue(node.layoutXProperty(), newX, Interpolator.EASE_BOTH);
+            final KeyValue kvY = new KeyValue(node.layoutYProperty(), newY, Interpolator.EASE_BOTH);
+            final KeyFrame kf = new KeyFrame(Duration.millis(n * animationTime), kvX, kvY);
+            timeline.getKeyFrames().add(kf);
+
+            if (n <= numCaptures) {
+                Pawn captured = captures.get(n - 1);
+                Node disappear = pawns.get(captured);
+
+                final KeyValue kvO1 = new KeyValue(disappear.opacityProperty(), 1, Interpolator.EASE_BOTH);
+                final KeyFrame kfO1 = new KeyFrame(Duration.millis((n-1) * animationTime), kvO1);
+
+                final KeyValue kvO = new KeyValue(disappear.opacityProperty(), 0, Interpolator.EASE_BOTH);
+                final KeyFrame kfO = new KeyFrame(Duration.millis(n * animationTime), kvO);
+
+                timeline.getKeyFrames().addAll(kfO, kfO1);
+            }
+            n++;
+        }
+
+        timeline.setOnFinished(event -> {
+            game.getSemaphore().release();
+        });
+
+        try {
+            game.getSemaphore().acquire();
+        } catch (InterruptedException e) {
+            game.getSemaphore().release();
+            System.out.println("WTF");
+        }
+
+        Platform.runLater(() -> {
+            logMessage(move.toString());
+            node.toFront();
+            timeline.play();
+        });
     }
 
     @Override
-    public void pawnCaptured(Pawn pawn) {
+    public void pawnCrowned(Pawn pawn) {
+        logMessage("Crowned!");
 
+        Node node = pawns.get(pawn);
+        node.getStyleClass().add("crowned");
+    }
+
+    @Override
+    public void turnChanged(Color color) {
+        Platform.runLater(() -> {
+            Player player = game.getPlayer(color);
+            turnName.setText(player.getPlayerName());
+            turnName.getStyleClass().setAll("pawn", color == Color.BLACK ? "black" : "white");
+        });
     }
 
     public void newGame(ActionEvent event) {
-        Player p1 = new HumanPlayer("Andrzej", this);
-        Player p2 = new HumanPlayer("Bartek", this);
 
-        game = new Game(8, 2, p1, p2);
+        //Player player1 = new HumanPlayer("Andrzej", this);
+        Player player1 = new ComputerPlayer();
+        //Player computer2 = new ComputerPlayer();
+        Player player2 = new HumanPlayer("Bartek", this);
+
+        game = new Game(8, 3, player1, player2);
         game.setListener(this);
+
+        fieldClicker = new FieldClickHandler(player1 instanceof HumanPlayer?(HumanPlayer) player1:null, player2 instanceof HumanPlayer?(HumanPlayer) player2:null);
+
         drawBoard();
+        game.start();
+        logMessage("Game started");
     }
 
     public void setTheme1(ActionEvent event) {
-        boardPane.getStyleClass().setAll("theme1");
+        root.getStyleClass().setAll("root", "theme1");
     }
 
     public void setTheme2(ActionEvent event) {
-        boardPane.getStyleClass().setAll("theme2");
+        root.getStyleClass().setAll("root", "theme2");
     }
 
     public void setTheme3(ActionEvent event) {
-        boardPane.getStyleClass().setAll("theme3");
+        root.getStyleClass().setAll("root", "theme3");
     }
 
 }

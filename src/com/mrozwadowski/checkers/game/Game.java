@@ -4,6 +4,10 @@ import com.mrozwadowski.checkers.errors.IllegalMoveException;
 import com.mrozwadowski.checkers.events.GameEventListener;
 import com.mrozwadowski.checkers.players.Player;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Semaphore;
+
 /**
  * Represents a game in progress and its state.
  *
@@ -14,6 +18,11 @@ public class Game {
     private Color turn;
     private Player blackPlayer, whitePlayer;
     private GameEventListener listener;
+    private boolean started;
+    private boolean over;
+
+    private Semaphore semaphore;
+    private Semaphore blackSemaphore, whiteSemaphore;
 
     public Game(int boardSize, int pawnRows, Player blackPlayer, Player whitePlayer) {
         if (boardSize < 5) {
@@ -26,13 +35,23 @@ public class Game {
         board = new Board(boardSize);
         placePawns(pawnRows);
 
+        blackSemaphore = new Semaphore(1);
+        whiteSemaphore = new Semaphore(1);
+
+        try {
+            blackSemaphore.acquire();
+            whiteSemaphore.acquire();
+        } catch (InterruptedException e) {
+            System.out.println("WTF");
+        }
+
         this.blackPlayer = blackPlayer;
         this.whitePlayer = whitePlayer;
-        blackPlayer.setGame(this);
-        whitePlayer.setGame(this);
+        blackPlayer.setGame(this, Color.BLACK, blackSemaphore);
+        whitePlayer.setGame(this, Color.WHITE, whiteSemaphore);
+        semaphore = new Semaphore(1);
 
-        turn = Color.WHITE;
-        whitePlayer.myTurn();
+        turn = Color.BLACK;
     }
 
     public Board getBoard() {
@@ -51,23 +70,69 @@ public class Game {
         return color == Color.BLACK ? blackPlayer : whitePlayer;
     }
 
+    public boolean isOver() {
+        return over;
+    }
+
+    public Semaphore getSemaphore() {
+        return semaphore;
+    }
+
+    private Semaphore getPlayerSemaphore(Color color) {
+        return color == Color.BLACK ? blackSemaphore : whiteSemaphore;
+    }
+
     /**
      * Places white and black pawns on the edges of the board.
      */
     private void placePawns(int pawnRows) {
         for (int i=0; i<pawnRows; i++) {
             for (int j=i%2; j<board.getSize(); j+=2) {
-                board.placePawn(i, j, new Pawn(Color.WHITE));
+                board.placePawn(i, j, Color.WHITE);
             }
         }
 
         for (int i=board.getSize()-pawnRows; i<board.getSize(); i++) {
             for (int j=i%2; j<board.getSize(); j+=2) {
-                board.placePawn(i, j, new Pawn(Color.BLACK));
+                board.placePawn(i, j, Color.BLACK);
             }
         }
     }
 
+    public void start() {
+        if (!started) {
+            started = true;
+            switchTurn();
+
+            blackPlayer.start();
+            whitePlayer.start();
+        }
+    }
+
+    private void gameOver() {
+        over = true;
+        blackSemaphore.release();
+        whiteSemaphore.release();
+    }
+
+    public void move(MoveSequence move) {
+        // let's just assume it's legit
+
+        Field source = move.getSource();
+        Field target = move.getTarget();
+        Pawn pawn = source.getPawn();
+
+        pawn.moveTo(target);
+
+        for (Pawn captured: move.getCaptures()) {
+            captured.getField().setPawn(null);
+        }
+
+        listener.pawnMoved(pawn, move);
+        switchTurn();
+    }
+
+    /*
     public void move(Field source, Field target) throws IllegalMoveException {
         if (!source.hasPawn()) {
             throw new IllegalMoveException("Source field must have a pawn on it!");
@@ -79,27 +144,88 @@ public class Game {
         if (target.hasPawn()) {
             throw new IllegalMoveException("Target field must be empty!");
         }
-        int di = target.getRow() - source.getRow();
-        int dj = target.getColumn() - source.getColumn();
+
+        int i0 = source.getRow();
+        int j0 = source.getColumn();
+        int i = target.getRow();
+        int j = target.getColumn();
+
+
+        int di = i - i0;
+        int dj = j - j0;
         if (Math.abs(di) != Math.abs(dj)) {
             throw new IllegalMoveException("Moves must be diagonal!");
         }
+        if (pawn.isCrowned()) {
+            int iStep = di / Math.abs(di);
+            int jStep = dj / Math.abs(dj);
+            int iBetween = i0 + iStep;
+            int jBetween = j0 + jStep;
+            for (int k=1; k<Math.abs(di); k++) {
+                Field between = board.getFieldAt(iBetween, jBetween);
 
-        source.setPawn(target.getPawn());
-        target.setPawn(pawn);
+                if (between.hasPawn()) {
+                    Pawn captured = between.getPawn();
+                    if (captured.getColor() == pawn.getColor()) {
+                        throw new IllegalMoveException("Invalid capture!");
+                    } else {
+                        // listener.pawnCaptured(captured);
+                        between.setPawn(null);
+                    }
+                }
 
-        listener.pawnMoved(pawn, source, target);
+                iBetween += iStep;
+                jBetween += jStep;
+            };
+        } else {
+            if (Math.abs(di) == 2) {
+                int iBetween = (target.getRow() + source.getRow()) / 2;
+                int jBetween = (target.getColumn() + source.getColumn()) / 2;
+                Field between = board.getFieldAt(iBetween, jBetween);
+                Pawn captured = between.getPawn();
+
+                if (captured != null && pawn.getColor() != captured.getColor()) {
+                    // listener.pawnCaptured(captured);
+                    between.setPawn(null);
+                } else {
+                    throw new IllegalMoveException("Invalid capture!");
+                }
+            } else {
+                if (di > 0 && pawn.isBlack() || di < 0 && !pawn.isBlack()) {
+                    throw new IllegalMoveException("No backward moves!");
+                }
+            }
+        }
+
+        if (pawn.isBlack() && i == 0 || !pawn.isBlack() && i == board.getSize() - 1) {
+            pawn.setCrowned(true);
+            listener.pawnCrowned(pawn);
+        }
+
+        pawn.moveTo(target);
+        listener.pawnMoved(pawn, new MoveSequence(source, target));
 
         switchTurn();
     }
+    */
 
     private void switchTurn() {
+        List<MoveSequence> moves;
+
         if (turn == Color.BLACK) {
             turn = Color.WHITE;
-            whitePlayer.myTurn();
         } else {
             turn = Color.BLACK;
-            blackPlayer.myTurn();
         }
+
+        moves = board.findAllPossibleMoves(turn);
+        if (moves.isEmpty()) {
+            gameOver();
+            return;
+        }
+        getPlayer(turn).setMoves(moves);
+        getPlayerSemaphore(turn).release();
+
+        if(listener != null) listener.turnChanged(turn);
     }
 }
