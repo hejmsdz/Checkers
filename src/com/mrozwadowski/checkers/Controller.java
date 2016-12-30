@@ -52,14 +52,10 @@ public class Controller implements GameEventListener {
 
     private HashMap<Pawn, Circle> pawns;
 
-    public void logMessage(String message) {
-        logMessage(message, "");
-    }
-
-    public void logMessage(String message, String cssClass) {
+    public void logMessage(String message, String ...cssClasses) {
         Label item = new Label(message);
-        if (!cssClass.isEmpty()) {
-            item.getStyleClass().add(cssClass);
+        if (cssClasses.length > 0) {
+            item.getStyleClass().addAll(cssClasses);
         }
         gameLog.getItems().add(item);
         gameLog.scrollTo(item);
@@ -178,7 +174,7 @@ public class Controller implements GameEventListener {
         }
 
         Platform.runLater(() -> {
-            logMessage(move.toString());
+            logMessage(move.toString(), "pawn", pawn.isBlack() ? "black" : "white");
             node.toFront();
             timeline.play();
         });
@@ -186,10 +182,12 @@ public class Controller implements GameEventListener {
 
     @Override
     public void pawnCrowned(Pawn pawn) {
-        logMessage("Crowned!");
-
         Node node = pawns.get(pawn);
-        node.getStyleClass().add("crowned");
+
+        Platform.runLater(() -> {
+            logMessage("Crowned!");
+            node.getStyleClass().add("crowned");
+        });
     }
 
     @Override
@@ -203,10 +201,10 @@ public class Controller implements GameEventListener {
 
     public void newGame(ActionEvent event) {
 
-        //Player player1 = new HumanPlayer("Andrzej", this);
+        //Player player1 = new HumanPlayer("Player", this);
         Player player1 = new ComputerPlayer();
-        //Player computer2 = new ComputerPlayer();
-        Player player2 = new HumanPlayer("Bartek", this);
+        //Player player2 = new ComputerPlayer();
+        Player player2 = new HumanPlayer("Player", this);
 
         game = new Game(8, 3, player1, player2);
         game.setListener(this);

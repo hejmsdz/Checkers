@@ -3,6 +3,10 @@
     -fx-font-weight: bold;
 }
 
+#gameLog .pawn {
+    -fx-text-fill: -fx-base;
+}
+
 .pawn {
     -fx-fill: -fx-base;
     -fx-stroke-width: 5px;

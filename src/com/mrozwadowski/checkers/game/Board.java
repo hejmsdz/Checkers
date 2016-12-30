@@ -73,41 +73,67 @@ public class Board {
         return neighbors;
     }
 
-    public List<MoveSequence> findPossibleCaptures(Field source, Color attacker, Board aux, MoveSequence initial) {
+    public List<MoveSequence> findPossibleCaptures(Field source, Pawn attacker, Board aux, MoveSequence initial) {
         if (initial == null) {
             initial = new MoveSequence(source);
         }
         List<MoveSequence> captures = new ArrayList<>();
+        boolean crowned = attacker.isCrowned();
 
         for (Field neighbor: aux.getNeighbors(source)) {
-            if (neighbor.hasPawn() && neighbor.getPawn().getColor() != attacker) {
-                int i = neighbor.getRow() + neighbor.getRow() - source.getRow();
-                int j = neighbor.getColumn() + neighbor.getColumn() - source.getColumn();
-                Field end = getFieldAt(i, j); // original board
-                if (end == null) {
-                    continue;
-                }
+            int i = neighbor.getRow();
+            int j = neighbor.getColumn();
+            int di = i - source.getRow();
+            int dj = j - source.getColumn();
+            Field end;
 
-                if (!end.hasPawn()) {
-                    MoveSequence move = new MoveSequence(initial, end);
-                    move.addCapture(getFieldAt(neighbor.getRow(), neighbor.getColumn()).getPawn());
-
-                    Board boardCopy = new Board(this);
-                    Field neighborCopy = boardCopy.getFieldAt(neighbor.getRow(), neighbor.getColumn());
-                    Field endCopy = boardCopy.getFieldAt(i, j);
-                    neighborCopy.setPawn(null);
-
-                    List<MoveSequence> cont = findPossibleCaptures(endCopy, attacker, boardCopy, move);
-                    if (cont.isEmpty()) {
-                        captures.add(move);
+            if (crowned) {
+                Field field = neighbor;
+                Pawn captured = null;
+                do {
+                    if (field.hasPawn() && captured == null) {
+                        if (field.getPawn().getColor() != attacker.getColor()) {
+                            captured = field.getPawn();
+                        }
+                    } else if (!field.hasPawn()) {
+                        if (captured != null) {
+                            addCapture(captures, initial, captured.getField(), field, attacker);
+                        }
                     } else {
-                        captures.addAll(cont);
+                        break;
                     }
+
+                    field = aux.getFieldAt(i += di, j += dj);
+                } while (field != null);
+            } else if (neighbor.hasPawn() && neighbor.getPawn().getColor() != attacker.getColor()) {
+                i += di;
+                j += dj;
+                end = getFieldAt(i, j); // original board
+                if (end != null && !end.hasPawn()) {
+                    addCapture(captures, initial, neighbor, end, attacker);
                 }
             }
+
         }
 
         return captures;
+    }
+
+    private void addCapture(List<MoveSequence> moves, MoveSequence initial, Field neighbor, Field end, Pawn attacker) {
+        MoveSequence move = new MoveSequence(initial, end);
+        move.addCapture(getFieldAt(neighbor.getRow(), neighbor.getColumn()).getPawn());
+        moves.add(move);
+
+        // try to extend a capture by searching a board with the victim pawn removed
+        Board boardCopy = new Board(this);
+        Field neighborCopy = boardCopy.getFieldAt(neighbor.getRow(), neighbor.getColumn());
+        Field endCopy = boardCopy.getFieldAt(end.getRow(), end.getColumn());
+        neighborCopy.setPawn(null);
+
+        List<MoveSequence> cont = findPossibleCaptures(endCopy, attacker, boardCopy, move);
+        if (!cont.isEmpty()) {
+            moves.addAll(cont);
+        }
     }
 
     public List<MoveSequence> findAllPossibleCaptures(Color attacker) {
@@ -117,7 +143,7 @@ public class Board {
             for (j=0; j<size; j++) {
                 Field field = getFieldAt(i, j);
                 if (field.hasPawn() && field.getPawn().getColor() == attacker) {
-                    captures.addAll(findPossibleCaptures(field, attacker, this, null));
+                    captures.addAll(findPossibleCaptures(field, field.getPawn(), this, null));
                 }
             }
         }
@@ -128,7 +154,7 @@ public class Board {
         List<MoveSequence> moves;
         Pawn pawn = source.getPawn();
         if (findCaptures) {
-            moves = findPossibleCaptures(source, pawn.getColor(), this, null);
+            moves = findPossibleCaptures(source, pawn, this, null);
             if (moves.size() > 0) {
                 return moves;
             }
@@ -136,14 +162,28 @@ public class Board {
             moves = new ArrayList<>();
         }
 
-        int i = source.getRow();
-        int j = source.getColumn();
 
         for (Field neighbor: getNeighbors(source)) {
-            if (!neighbor.hasPawn() && (pawn.isCrowned() || (neighbor.getRow() < source.getRow() && pawn.isBlack()) || (neighbor.getRow() > source.getRow() && !pawn.isBlack()))) {
+            int i = neighbor.getRow();
+            int j = neighbor.getColumn();
+            int di = i - source.getRow();
+            int dj = j - source.getColumn();
+            if (pawn.isCrowned()) {
+                Field field = neighbor;
+                do {
+                    if (field.hasPawn()) {
+                        break;
+                    } else {
+                        moves.add(new MoveSequence(source, field));
+                    }
+
+                    field = getFieldAt(i += di, j += dj);
+                } while (field != null);
+            } else if (!neighbor.hasPawn() && (di < 0 && pawn.isBlack() || di > 0 && !pawn.isBlack())) {
                 moves.add(new MoveSequence(source, neighbor));
             }
         }
+
         return moves;
     }
 

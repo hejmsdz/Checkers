@@ -128,6 +128,15 @@ public class Game {
             captured.getField().setPawn(null);
         }
 
+        // pawn can be crowned
+        for (Field field: move.getFields()) {
+            int row = field.getRow();
+            if (pawn.isBlack() && row == 0 || !pawn.isBlack() && row == board.getSize() - 1) {
+                pawn.setCrowned(true);
+                listener.pawnCrowned(pawn);
+            }
+        }
+
         listener.pawnMoved(pawn, move);
         switchTurn();
     }
