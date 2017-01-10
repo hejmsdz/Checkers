@@ -17,4 +17,6 @@ public interface GameEventListener {
     void turnChanged(Color color);
 
     void gameOver(Color winner);
+
+    void timeUpdate(int time);
 }

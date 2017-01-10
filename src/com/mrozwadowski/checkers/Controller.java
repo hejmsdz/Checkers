@@ -42,6 +42,8 @@ public class Controller implements GameEventListener {
     @FXML
     private Label turnName;
     @FXML
+    private Label timeCounter;
+    @FXML
     private ListView<Label> gameLog;
 
     private Game game;
@@ -201,6 +203,14 @@ public class Controller implements GameEventListener {
     }
 
     @Override
+    public void timeUpdate(int time) {
+        String timeText = String.format("%d:%02d", time / 60, time % 60);
+        Platform.runLater(() -> {
+            timeCounter.setText(timeText);
+        });
+    }
+
+    @Override
     public void gameOver(Color winner) {
         String winnerName = game.getPlayer(winner).getPlayerName();
         Platform.runLater(() -> {
@@ -239,6 +249,7 @@ public class Controller implements GameEventListener {
 
         game.setListener(this);
         drawBoard();
+        timeUpdate(0);
         game.start();
         logMessage("Game started");
     }

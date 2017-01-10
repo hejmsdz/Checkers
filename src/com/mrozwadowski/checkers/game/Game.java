@@ -4,7 +4,7 @@ import com.mrozwadowski.checkers.events.GameEventListener;
 import com.mrozwadowski.checkers.players.Player;
 
 import java.util.List;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 
 /**
  * Represents a game in progress and its state.
@@ -16,6 +16,8 @@ public class Game {
     private Color turn;
     private Player blackPlayer, whitePlayer;
     private GameEventListener listener;
+    private int time;
+    private ScheduledExecutorService timer;
     private boolean started;
     private boolean over;
 
@@ -50,6 +52,13 @@ public class Game {
         semaphore = new Semaphore(1);
 
         turn = Color.BLACK;
+
+        time = 0;
+        timer = Executors.newScheduledThreadPool(1);
+        timer.scheduleAtFixedRate(() -> {
+            time++;
+            if (listener != null) listener.timeUpdate(time);
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
     public Board getBoard() {
@@ -118,6 +127,8 @@ public class Game {
 
         blackPlayer.interrupt();
         whitePlayer.interrupt();
+
+        timer.shutdown();
 
         listener.gameOver(turn.opposite());
     }
