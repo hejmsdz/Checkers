@@ -144,7 +144,6 @@ public class Board {
         Field neighborCopy = boardCopy.getFieldAt(neighbor.getRow(), neighbor.getColumn());
         Field endCopy = boardCopy.getFieldAt(end.getRow(), end.getColumn());
         neighborCopy.setPawn(null);
-        boardCopy.dump();
 
         List<MoveSequence> cont = findPossibleCaptures(endCopy, attacker, boardCopy, move);
         if (!cont.isEmpty()) {

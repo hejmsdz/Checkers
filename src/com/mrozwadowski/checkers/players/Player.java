@@ -53,8 +53,6 @@ public abstract class Player extends Thread {
 
             moves = null;
         }
-
-        System.out.println("Goodbye from "+getPlayerName());
     }
 
 }

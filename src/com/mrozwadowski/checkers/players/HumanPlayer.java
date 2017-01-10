@@ -1,13 +1,8 @@
 package com.mrozwadowski.checkers.players;
 
-import com.mrozwadowski.checkers.Controller;
-import com.mrozwadowski.checkers.errors.IllegalMoveException;
-import com.mrozwadowski.checkers.game.Color;
 import com.mrozwadowski.checkers.game.Field;
-import com.mrozwadowski.checkers.game.Game;
 import com.mrozwadowski.checkers.game.MoveSequence;
 
-import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
