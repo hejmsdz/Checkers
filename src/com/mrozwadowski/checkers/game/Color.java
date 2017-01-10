@@ -7,5 +7,9 @@ package com.mrozwadowski.checkers.game;
  */
 public enum Color {
     BLACK,
-    WHITE
+    WHITE;
+
+    public Color opposite() {
+        return this == BLACK ? WHITE : BLACK;
+    }
 }

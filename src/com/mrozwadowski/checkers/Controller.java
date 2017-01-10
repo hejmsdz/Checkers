@@ -200,6 +200,18 @@ public class Controller implements GameEventListener {
         });
     }
 
+    @Override
+    public void gameOver(Color winner) {
+        String winnerName = game.getPlayer(winner).getPlayerName();
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Game over");
+            alert.setHeaderText("Game over");
+            alert.setContentText(winnerName + " wins!");
+            alert.showAndWait();
+        });
+    }
+
     public void newGame(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("newGame.fxml"));

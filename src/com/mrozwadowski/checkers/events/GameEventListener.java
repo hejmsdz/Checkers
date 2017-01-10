@@ -15,4 +15,6 @@ public interface GameEventListener {
     void pawnCrowned(Pawn pawn);
 
     void turnChanged(Color color);
+
+    void gameOver(Color winner);
 }

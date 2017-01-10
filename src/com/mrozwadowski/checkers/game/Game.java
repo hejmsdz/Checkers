@@ -118,6 +118,8 @@ public class Game {
 
         blackPlayer.interrupt();
         whitePlayer.interrupt();
+
+        listener.gameOver(turn.opposite());
     }
 
     public void move(MoveSequence move) {
