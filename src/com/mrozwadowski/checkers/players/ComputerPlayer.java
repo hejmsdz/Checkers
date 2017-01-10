@@ -11,13 +11,15 @@ import java.util.Random;
  */
 public class ComputerPlayer extends Player {
     private Random random;
+    private String name;
 
-    public ComputerPlayer() {
+    public ComputerPlayer(String name) {
+        this.name = name;
         random = new Random();
     }
 
     public String getPlayerName() {
-        return "Computer";
+        return name;
     }
 
     public MoveSequence move() {

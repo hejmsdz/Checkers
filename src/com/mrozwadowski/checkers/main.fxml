@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane fx:id="root" styleClass="theme1" prefHeight="200.0" prefWidth="200.0" stylesheets="@default.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mrozwadowski.checkers.Controller">
+<BorderPane fx:id="root" prefHeight="200.0" prefWidth="200.0" styleClass="theme1" stylesheets="@default.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mrozwadowski.checkers.Controller">
     <center>
         <Pane fx:id="boardPane" minHeight="500.0" minWidth="500.0">
             <BorderPane.margin>
@@ -26,7 +26,7 @@
             <Menu mnemonicParsing="false" text="Game">
                 <MenuItem mnemonicParsing="false" text="Pause" />
                 <MenuItem mnemonicParsing="false" onAction="#newGame" text="New game..." />
-                <MenuItem mnemonicParsing="false" text="Close" />
+                <MenuItem mnemonicParsing="false" onAction="#close" text="Close" />
             </Menu>
             <Menu mnemonicParsing="false" text="Theme">
                 <MenuItem mnemonicParsing="false" onAction="#setTheme1" text="Style 1" />
@@ -34,7 +34,7 @@
                 <MenuItem mnemonicParsing="false" onAction="#setTheme3" text="Style 3" />
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
-                <MenuItem mnemonicParsing="false" text="About" />
+                <MenuItem mnemonicParsing="false" onAction="#about" text="About" />
             </Menu>
         </MenuBar>
     </top>

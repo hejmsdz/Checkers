@@ -44,10 +44,17 @@ public abstract class Player extends Thread {
             }
 
             MoveSequence chosenMove = move();
+
+            if (chosenMove == null) {
+                break;
+            }
+
             game.move(chosenMove);
 
             moves = null;
         }
+
+        System.out.println("Goodbye from "+getPlayerName());
     }
 
 }

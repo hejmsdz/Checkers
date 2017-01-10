@@ -1,6 +1,5 @@
 package com.mrozwadowski.checkers;
 
-import com.mrozwadowski.checkers.errors.IllegalMoveException;
 import com.mrozwadowski.checkers.events.FieldClickHandler;
 import com.mrozwadowski.checkers.events.GameEventListener;
 import com.mrozwadowski.checkers.game.*;
@@ -15,20 +14,23 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 public class Controller implements GameEventListener {
     @FXML
@@ -185,7 +187,6 @@ public class Controller implements GameEventListener {
         Node node = pawns.get(pawn);
 
         Platform.runLater(() -> {
-            logMessage("Crowned!");
             node.getStyleClass().add("crowned");
         });
     }
@@ -200,20 +201,49 @@ public class Controller implements GameEventListener {
     }
 
     public void newGame(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("newGame.fxml"));
+            Parent root1 = (Parent) fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setTitle("New game");
+            stage.setScene(new Scene(root1));
+            stage.show();
+            ((NewGameController)fxmlLoader.getController()).mainController = this;
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-        //Player player1 = new HumanPlayer("Player", this);
-        Player player1 = new ComputerPlayer();
-        //Player player2 = new ComputerPlayer();
-        Player player2 = new HumanPlayer("Player", this);
+    void startNewGame(Game newGame) {
+        if (game != null && !game.isOver()) {
+            game.end();
+        }
 
-        game = new Game(8, 3, player1, player2);
+        this.game = newGame;
+        Player blackPlayer = game.getPlayer(Color.BLACK);
+        Player whitePlayer = game.getPlayer(Color.WHITE);
+
+        fieldClicker = new FieldClickHandler(blackPlayer instanceof HumanPlayer?(HumanPlayer) blackPlayer:null, whitePlayer instanceof HumanPlayer?(HumanPlayer) whitePlayer:null);
+
         game.setListener(this);
-
-        fieldClicker = new FieldClickHandler(player1 instanceof HumanPlayer?(HumanPlayer) player1:null, player2 instanceof HumanPlayer?(HumanPlayer) player2:null);
-
         drawBoard();
         game.start();
         logMessage("Game started");
+    }
+
+    public void close(ActionEvent event) {
+        Stage stage = (Stage) boardPane.getScene().getWindow();
+        stage.close();
+    }
+
+    public void about(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About");
+        alert.setHeaderText("Checkers");
+        alert.setContentText("Checkers v1.0.0 by Mikołaj Rozwadowski\nProject assignment for Object-Oriented Programming laboratory class\nPoznań University of Technology, January 2017\nhttps://mrozwadowski.com/");
+        alert.getDialogPane().setMinHeight(240);
+
+        alert.showAndWait();
     }
 
     public void setTheme1(ActionEvent event) {

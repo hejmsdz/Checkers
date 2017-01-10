@@ -17,14 +17,12 @@ import java.util.concurrent.Semaphore;
  */
 public class HumanPlayer extends Player {
     private String name;
-    private Controller controller;
     private Field moveSource, moveTarget;
     private MoveSequence chosenMove;
     private Semaphore moveReady;
 
-    public HumanPlayer(String name, Controller controller) {
+    public HumanPlayer(String name) {
         this.name = name;
-        this.controller = controller;
         moveReady = new Semaphore(1);
         try {
             moveReady.acquire();
@@ -64,6 +62,7 @@ public class HumanPlayer extends Player {
             moveReady.acquire();
         } catch (InterruptedException e) {
             moveReady.release();
+            return null;
         }
         return chosenMove;
     }

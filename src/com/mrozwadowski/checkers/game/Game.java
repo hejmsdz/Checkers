@@ -109,10 +109,17 @@ public class Game {
         }
     }
 
+    public void end() {
+        gameOver();
+    }
+
     private void gameOver() {
         over = true;
         blackSemaphore.release();
         whiteSemaphore.release();
+
+        blackPlayer.interrupt();
+        whitePlayer.interrupt();
     }
 
     public void move(MoveSequence move) {
