@@ -45,8 +45,10 @@ public class HumanPlayer extends Player {
 
         if (moveSource != null && moves != null) {
             for (MoveSequence move: moves) {
-                if (move.getSource() == moveSource && move.getTarget() == moveTarget) {
-                    chosenMove = move;
+                if (move.getSource().equals(moveSource) && move.getTarget().equals(moveTarget)) {
+                    if (chosenMove == null || move.getCaptures().size() > chosenMove.getCaptures().size()) {
+                        chosenMove = move;
+                    }
                 }
             }
 
