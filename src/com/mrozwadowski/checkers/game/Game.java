@@ -24,7 +24,7 @@ public class Game {
     private Semaphore semaphore;
     private Semaphore blackSemaphore, whiteSemaphore;
 
-    public Game(int boardSize, int pawnRows, Player blackPlayer, Player whitePlayer) {
+    public Game(int boardSize, int pawnRows, Player blackPlayer, Player whitePlayer, int timeLimit) {
         if (boardSize < 5) {
             throw new IllegalArgumentException("Minimum board size is 5");
         }
@@ -53,11 +53,14 @@ public class Game {
 
         turn = Color.BLACK;
 
-        time = 0;
+        time = timeLimit > 0 ? -timeLimit : 0;
         timer = Executors.newScheduledThreadPool(1);
         timer.scheduleAtFixedRate(() -> {
             time++;
             if (listener != null) listener.timeUpdate(time);
+            if (time == 0) {
+                gameOver();
+            }
         }, 1, 1, TimeUnit.SECONDS);
     }
 
@@ -87,6 +90,10 @@ public class Game {
 
     private Semaphore getPlayerSemaphore(Color color) {
         return color == Color.BLACK ? blackSemaphore : whiteSemaphore;
+    }
+
+    public int getTime() {
+        return time;
     }
 
     /**

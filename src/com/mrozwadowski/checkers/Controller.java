@@ -91,7 +91,7 @@ public class Controller implements GameEventListener {
                 if (fieldClicker != null) {
                     square.setOnMouseClicked(fieldClicker);
                 }
-                square.setOnMouseEntered(event -> fieldName.setText(field.userFriendlyCoordinates()+" ["+field.getRow()+","+field.getColumn()+"]"+" ["+field.getPawn()+"]"));
+                square.setOnMouseEntered(event -> fieldName.setText(field.userFriendlyCoordinates()));
                 square.setOnMouseExited(event -> fieldName.setText(""));
                 objects.add(square);
 
@@ -204,7 +204,8 @@ public class Controller implements GameEventListener {
 
     @Override
     public void timeUpdate(int time) {
-        String timeText = String.format("%d:%02d", time / 60, time % 60);
+        int absTime = Math.abs(time);
+        String timeText = String.format("%s%d:%02d", time < 0 ? "-" : "", absTime / 60, absTime % 60);
         Platform.runLater(() -> {
             timeCounter.setText(timeText);
         });
@@ -249,7 +250,7 @@ public class Controller implements GameEventListener {
 
         game.setListener(this);
         drawBoard();
-        timeUpdate(0);
+        timeUpdate(game.getTime());
         game.start();
         logMessage("Game started");
     }

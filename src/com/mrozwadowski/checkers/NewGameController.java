@@ -15,19 +15,25 @@ public class NewGameController {
     @FXML
     private TextField whiteName, blackName;
     @FXML
-    private Spinner<Integer> boardSize, pawnRows;
-    private SpinnerValueFactory boardSizeFactory, pawnRowsFactory;
+    private Spinner<Integer> boardSize, pawnRows, timeLimit;
+    @FXML
+    private CheckBox timeLimitCheck;
+    private SpinnerValueFactory boardSizeFactory, pawnRowsFactory, timeLimitFactory;
 
     Controller mainController;
 
     public void initialize() {
-        boardSizeFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(5, 20);
-        boardSizeFactory.setValue(8);
-        pawnRowsFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 4);
-        pawnRowsFactory.setValue(3);
+        boardSizeFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(5, 20, 8);
+        pawnRowsFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 4, 3);
+        timeLimitFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(30, 600, 120, 10);
 
         boardSize.setValueFactory(boardSizeFactory);
         pawnRows.setValueFactory(pawnRowsFactory);
+        timeLimit.setValueFactory(timeLimitFactory);
+    }
+
+    public void timeLimitChecked(ActionEvent event) {
+        timeLimit.setDisable(!timeLimitCheck.isSelected());
     }
 
     public void startGame(ActionEvent event) {
@@ -46,7 +52,12 @@ public class NewGameController {
             blackPlayer = new ComputerPlayer(blackName.getText());
         }
 
-        Game game = new Game(boardSizeValue, pawnRowsValue, blackPlayer, whitePlayer);
+        int limit = 0;
+        if (timeLimitCheck.isSelected()) {
+            limit = (int)timeLimitFactory.getValue();
+        }
+
+        Game game = new Game(boardSizeValue, pawnRowsValue, blackPlayer, whitePlayer, limit);
         mainController.startNewGame(game);
         Stage stage = (Stage) boardSize.getScene().getWindow();
         stage.close();

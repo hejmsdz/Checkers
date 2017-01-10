@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.Spinner?>
@@ -34,12 +35,12 @@
                         <children>
                             <HBox prefHeight="100.0" prefWidth="200.0" spacing="20.0">
                                 <children>
-                                    <RadioButton mnemonicParsing="false" selected="true" text="Human" fx:id="whiteHuman">
+                                    <RadioButton fx:id="whiteHuman" mnemonicParsing="false" selected="true" text="Human">
                                         <toggleGroup>
                                             <ToggleGroup fx:id="whiteType" />
                                         </toggleGroup>
                                     </RadioButton>
-                                    <RadioButton mnemonicParsing="false" text="Computer" toggleGroup="$whiteType" fx:id="whiteComputer" />
+                                    <RadioButton fx:id="whiteComputer" mnemonicParsing="false" text="Computer" toggleGroup="$whiteType" />
                                 </children>
                             </HBox>
                             <HBox prefHeight="71.0" prefWidth="285.0" spacing="10.0">
@@ -62,12 +63,12 @@
                      <children>
                         <HBox prefHeight="100.0" prefWidth="200.0" spacing="20.0">
                            <children>
-                              <RadioButton mnemonicParsing="false" text="Human" fx:id="blackHuman">
+                              <RadioButton fx:id="blackHuman" mnemonicParsing="false" text="Human">
                                  <toggleGroup>
                                     <ToggleGroup fx:id="blackType" />
                                  </toggleGroup>
                               </RadioButton>
-                              <RadioButton mnemonicParsing="false" selected="true" text="Computer" toggleGroup="$blackType" fx:id="blackComputer" />
+                              <RadioButton fx:id="blackComputer" mnemonicParsing="false" selected="true" text="Computer" toggleGroup="$blackType" />
                            </children>
                         </HBox>
                         <HBox prefHeight="71.0" prefWidth="285.0" spacing="10.0">
@@ -108,7 +109,19 @@
       </TitledPane>
       <TitledPane animated="false" collapsible="false" prefHeight="155.0" prefWidth="252.0" text="Time limit" GridPane.columnIndex="1" GridPane.rowIndex="1">
         <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="582.0" />
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="582.0">
+               <children>
+                  <VBox layoutX="14.0" layoutY="-62.0" prefHeight="93.0" prefWidth="268.0" spacing="20" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <CheckBox fx:id="timeLimitCheck" mnemonicParsing="false" onAction="#timeLimitChecked" text="Set a time limit" />
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label alignment="CENTER" prefHeight="24.0" prefWidth="105.0" text="Limit (seconds):" />
+                              <Spinner fx:id="timeLimit" disable="true" editable="true" prefHeight="26.0" prefWidth="118.0" />
+                           </children></HBox>
+                     </children>
+                  </VBox>
+               </children></AnchorPane>
         </content>
       </TitledPane>
       <Button fx:id="start" mnemonicParsing="false" onAction="#startGame" text="Start the game" GridPane.rowIndex="2" />
