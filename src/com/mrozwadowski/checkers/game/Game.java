@@ -124,6 +124,7 @@ public class Game {
     }
 
     public void end() {
+        listener = null;
         gameOver();
     }
 
@@ -137,7 +138,7 @@ public class Game {
 
         timer.shutdown();
 
-        listener.gameOver(turn.opposite());
+        if (listener != null) listener.gameOver(turn.opposite());
     }
 
     public void move(MoveSequence move) {

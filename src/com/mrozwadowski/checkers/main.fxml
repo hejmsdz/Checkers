@@ -15,7 +15,7 @@
 
 <BorderPane fx:id="root" prefHeight="200.0" prefWidth="200.0" styleClass="theme1" stylesheets="@default.css" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mrozwadowski.checkers.Controller">
     <center>
-        <Pane fx:id="boardPane" minHeight="500.0" minWidth="500.0">
+        <Pane fx:id="boardPane" minHeight="500.0" minWidth="500.0" onMouseClicked="#boardClick" styleClass="new">
             <BorderPane.margin>
                 <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
             </BorderPane.margin>
@@ -33,6 +33,7 @@
                 <MenuItem mnemonicParsing="false" onAction="#setTheme3" text="Style 3" />
             </Menu>
             <Menu mnemonicParsing="false" text="Help">
+                <MenuItem mnemonicParsing="false" onAction="#howToPlay" text="How to play" />
                 <MenuItem mnemonicParsing="false" onAction="#about" text="About" />
             </Menu>
         </MenuBar>

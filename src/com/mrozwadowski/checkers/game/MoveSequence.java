@@ -57,7 +57,7 @@ public class MoveSequence {
     public String toString() {
         String out = "";
         for (Field field: fields) {
-            out += field.userFriendlyCoordinates() + " ";
+            out += field.toString() + " ";
         }
         return out;
     }

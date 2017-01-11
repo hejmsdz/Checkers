@@ -17,6 +17,10 @@
     -fx-fill: derive(-fx-base, -20%);
 }
 
+#boardPane.new {
+    -fx-background-image: url("welcome.png");
+}
+
 /* theme 1 */
 .theme1 #boardPane {
     -fx-background-color: #363732;

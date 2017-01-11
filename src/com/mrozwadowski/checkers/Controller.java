@@ -3,7 +3,6 @@ package com.mrozwadowski.checkers;
 import com.mrozwadowski.checkers.events.FieldClickHandler;
 import com.mrozwadowski.checkers.events.GameEventListener;
 import com.mrozwadowski.checkers.game.*;
-import com.mrozwadowski.checkers.players.ComputerPlayer;
 import com.mrozwadowski.checkers.players.HumanPlayer;
 import com.mrozwadowski.checkers.players.Player;
 import javafx.animation.Interpolator;
@@ -21,9 +20,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -56,7 +55,7 @@ public class Controller implements GameEventListener {
 
     private HashMap<Pawn, Circle> pawns;
 
-    public void logMessage(String message, String ...cssClasses) {
+    private void logMessage(String message, String ...cssClasses) {
         Label item = new Label(message);
         if (cssClasses.length > 0) {
             item.getStyleClass().addAll(cssClasses);
@@ -91,7 +90,7 @@ public class Controller implements GameEventListener {
                 if (fieldClicker != null) {
                     square.setOnMouseClicked(fieldClicker);
                 }
-                square.setOnMouseEntered(event -> fieldName.setText(field.userFriendlyCoordinates()));
+                square.setOnMouseEntered(event -> fieldName.setText(field.toString()));
                 square.setOnMouseExited(event -> fieldName.setText(""));
                 objects.add(square);
 
@@ -220,13 +219,20 @@ public class Controller implements GameEventListener {
             alert.setHeaderText("Game over");
             alert.setContentText(winnerName + " wins!");
             alert.showAndWait();
+            logMessage(winnerName + " wins!");
         });
     }
 
-    public void newGame(ActionEvent event) {
+    public void boardClick() {
+        if (boardPane.getStyleClass().contains("new")) {
+            newGame();
+        }
+    }
+
+    public void newGame() {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("newGame.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setTitle("New game");
             stage.setScene(new Scene(root1));
@@ -242,6 +248,8 @@ public class Controller implements GameEventListener {
             game.end();
         }
 
+        boardPane.getStyleClass().remove("new");
+
         this.game = newGame;
         Player blackPlayer = game.getPlayer(Color.BLACK);
         Player whitePlayer = game.getPlayer(Color.WHITE);
@@ -255,30 +263,51 @@ public class Controller implements GameEventListener {
         logMessage("Game started");
     }
 
-    public void close(ActionEvent event) {
+    public void close() {
         Stage stage = (Stage) boardPane.getScene().getWindow();
         stage.close();
     }
 
-    public void about(ActionEvent event) {
+    public void howToPlay() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("About");
+        alert.getDialogPane().setPrefWidth(500);
+        alert.getDialogPane().setPrefHeight(300);
+        alert.setTitle("How to play");
         alert.setHeaderText("Checkers");
-        alert.setContentText("Checkers v1.0.0 by Mikołaj Rozwadowski\nProject assignment for Object-Oriented Programming laboratory class\nPoznań University of Technology, January 2017\nhttps://mrozwadowski.com/");
-        alert.getDialogPane().setMinHeight(240);
+        alert.setContentText(
+                "Pawns can move diagonally across the board.\n" +
+                "Right click a pawn to pick it, left click on a field to drop it.\n" +
+                "To capture an enemy's pawn, just make a move over it. Multiple and backward captures are allowed.\n" +
+                "When a pawn reaches the other end of the board, it becomes crowned and can move across many fields at once.\n" +
+                "Enjoy!"
+        );
 
         alert.showAndWait();
     }
 
-    public void setTheme1(ActionEvent event) {
+    public void about() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.getDialogPane().setPrefHeight(240);
+        alert.setTitle("About");
+        alert.setHeaderText("Checkers");
+        alert.setContentText(
+                "Checkers v1.0.0 by Mikołaj Rozwadowski\n" +
+                "Project assignment for Object-Oriented Programming laboratory class\n" +
+                "Poznań University of Technology, January 2017\n" +
+                "https://mrozwadowski.com/");
+
+        alert.showAndWait();
+    }
+
+    public void setTheme1() {
         root.getStyleClass().setAll("root", "theme1");
     }
 
-    public void setTheme2(ActionEvent event) {
+    public void setTheme2() {
         root.getStyleClass().setAll("root", "theme2");
     }
 
-    public void setTheme3(ActionEvent event) {
+    public void setTheme3() {
         root.getStyleClass().setAll("root", "theme3");
     }
 

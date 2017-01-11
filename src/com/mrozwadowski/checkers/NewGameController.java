@@ -24,12 +24,18 @@ public class NewGameController {
 
     public void initialize() {
         boardSizeFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(5, 20, 8);
-        pawnRowsFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 4, 3);
+        pawnRowsFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 3, 3);
         timeLimitFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(30, 600, 120, 10);
 
         boardSize.setValueFactory(boardSizeFactory);
         pawnRows.setValueFactory(pawnRowsFactory);
         timeLimit.setValueFactory(timeLimitFactory);
+
+        boardSize.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int max = (int)(Math.ceil(newVal / 2.0) - 1);
+            pawnRowsFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, max, 3);
+            pawnRows.setValueFactory(pawnRowsFactory);
+        });
     }
 
     public void timeLimitChecked(ActionEvent event) {
@@ -57,7 +63,14 @@ public class NewGameController {
             limit = (int)timeLimitFactory.getValue();
         }
 
-        Game game = new Game(boardSizeValue, pawnRowsValue, blackPlayer, whitePlayer, limit);
+        Game game;
+        try {
+            game = new Game(boardSizeValue, pawnRowsValue, blackPlayer, whitePlayer, limit);
+        } catch (IllegalArgumentException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            return;
+        }
+
         mainController.startNewGame(game);
         Stage stage = (Stage) boardSize.getScene().getWindow();
         stage.close();

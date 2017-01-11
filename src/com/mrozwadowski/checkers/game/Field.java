@@ -46,7 +46,7 @@ public class Field {
     }
 
 
-    public String userFriendlyCoordinates() {
+    public String toString() {
         return "" + (char)('A' + column) + (row + 1);
     }
 }
